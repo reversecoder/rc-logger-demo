@@ -1,19 +1,15 @@
 apply plugin: 'com.android.library'
-//apply plugin: 'com.novoda.bintray-release'
-
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.3"
+
+    compileSdkVersion appCompileSdkVersion
+    buildToolsVersion appBuildToolsVersion
 
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 25
-        versionCode 100
-        versionName "1.0.0"
-
-//        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-
+        minSdkVersion appMinSdkVersion
+        targetSdkVersion appTargetSdkVersion
+        versionCode appVersionCode
+        versionName appVersionName
     }
     buildTypes {
         release {
@@ -21,17 +17,53 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    lintOptions {
+        abortOnError false
+    }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }
 
-//publish {
-//    groupId = 'com.github.armcha'
-//    artifactId = 'Logger'
-//    publishVersion = '2.1.0'
-//    desc = 'Simple logger'
-//    licences = ['MIT']
-//    website = 'https://github.com/armcha/logger'
-//}
+/*
+*
+* release
+*
+* */
+
+apply plugin: 'maven'
+
+repositories {
+    maven {
+        url "https://raw.github.com/synergian/wagon-git/releases"
+    }
+}
+
+configurations {
+    deployLibrary
+}
+
+dependencies {
+    deployLibrary "ar.com.synergian:wagon-git:0.3.0"
+}
+
+uploadArchives {
+
+    repositories.mavenDeployer {
+        configuration = configurations.deployLibrary
+        repository(url: 'git:releases://git@github.com:reversecoder/rc-logger-demo.git')
+        snapshotRepository(url: 'git:snapshots://git@github.com:reversecoder/rc-logger-demo.git')
+
+        uniqueVersion = true
+
+        pom.project {
+            groupId = 'com.reversecoder.logger'
+//            version = '1.0.0-SNAPSHOT'
+            version = '1.0.0'
+            artifactId = 'rc-logger'
+            packaging 'aar'
+        }
+    }
+}
