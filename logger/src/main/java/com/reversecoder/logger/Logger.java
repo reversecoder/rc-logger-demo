@@ -1,7 +1,14 @@
 package com.reversecoder.logger;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
 import android.util.Log;
+
+import java.io.File;
+import java.io.IOException;
 
 public class Logger {
 
@@ -11,7 +18,7 @@ public class Logger {
 
     private static LogType logType = LogType.DEBUG;
     private static boolean isLoggable = true;
-    private static String TAG = "Logger";
+    private static String TAG = Logger.class.getSimpleName();
     private static Builder mBuilder = null;
     private static Context mContext;
 
@@ -151,6 +158,45 @@ public class Logger {
 
         String getTag() {
             return tag;
+        }
+    }
+
+    public static void saveLogAndEmailFile(Context context, String devEmail, String[] ccEmail) {
+        Intent emailIntent = new Intent(Intent.ACTION_SEND);
+        emailIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        emailIntent.setType("text/plain");
+        emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{devEmail});
+        emailIntent.putExtra(Intent.EXTRA_CC, ccEmail);
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "[" + AppUtils.getApplicationName(context) + "_" + AppUtils.getApplicationVersion(context) + "] Debug log of " + AppUtils.convertMilliSecondToTime(System.currentTimeMillis(), "yyyy.MM.dd 'at' hh:mm:ss a"));
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("\nManufacturer: ").append(Build.MANUFACTURER);
+        sb.append("\nModel: ").append(Build.MODEL);
+        sb.append("\nAndroid version: ").append(Build.VERSION.RELEASE);
+
+        emailIntent.putExtra(Intent.EXTRA_TEXT, sb.toString());
+
+        String fileName = "[" + AppUtils.getApplicationName(context) + "_" + AppUtils.getApplicationVersion(context) + "]_" + AppUtils.convertMilliSecondToTime(System.currentTimeMillis(), "yyyy.MM.dd'_'hh.mm.ss'_'a") + ".txt";
+        File sdCard = Environment.getExternalStorageDirectory();
+        File dir = new File(sdCard.getAbsolutePath() + File.separator + AppUtils.getApplicationName(context));
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        if (dir.exists()) {
+            File outputFile = new File(dir, fileName);
+            Uri uri = Uri.fromFile(outputFile);
+            emailIntent.putExtra(Intent.EXTRA_STREAM, uri);
+
+            Log.d(TAG, "Going to send logcat from " + outputFile);
+            //emailIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(Intent.createChooser(emailIntent, "Pick an Email provider").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+
+            try {
+                @SuppressWarnings("unused")
+                Process process = Runtime.getRuntime().exec("logcat -f " + outputFile.getAbsolutePath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
