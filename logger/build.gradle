@@ -60,7 +60,7 @@ uploadArchives {
 
         pom.project {
             groupId = 'com.reversecoder.logger'
-            version = '1.0.0-SNAPSHOT'
+            version = '1.0.1-SNAPSHOT'
 //            version = '1.0.0'
             artifactId = 'rc-logger'
             packaging 'aar'
