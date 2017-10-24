@@ -2,11 +2,12 @@
 <metadata>
   <groupId>com.reversecoder.logger</groupId>
   <artifactId>rc-logger</artifactId>
+  <version>1.0.1-SNAPSHOT</version>
   <versioning>
-    <versions>
-      <version>1.0.0-SNAPSHOT</version>
-      <version>1.0.1-SNAPSHOT</version>
-    </versions>
+    <snapshot>
+      <timestamp>20171024.125304</timestamp>
+      <buildNumber>1</buildNumber>
+    </snapshot>
     <lastUpdated>20171024125304</lastUpdated>
   </versioning>
 </metadata>
